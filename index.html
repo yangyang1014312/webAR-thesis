@@ -1,0 +1,374 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>岩画 AR 智慧导览与斜光探查系统 - 终极多目标版</title>
+
+    <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.2/dist/mindar-image-aframe.prod.js"></script>
+
+    <style>
+      body { margin: 0; overflow: hidden; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+
+      /* 扫描引导层 UI */
+      #scanning-overlay {
+        position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+        background: rgba(0, 0, 0, 0.6); z-index: 9998;
+        display: flex; flex-direction: column; justify-content: center; align-items: center;
+        color: white; transition: opacity 0.5s; pointer-events: none;
+      }
+      .scan-frame {
+        width: 250px; height: 250px;
+        border: 2px dashed #00ffcc; border-radius: 15px;
+        animation: pulse 2s infinite; margin-bottom: 20px;
+      }
+      @keyframes pulse {
+        0% { box-shadow: 0 0 0 0 rgba(0, 255, 204, 0.4); }
+        70% { box-shadow: 0 0 0 20px rgba(0, 255, 204, 0); }
+        100% { box-shadow: 0 0 0 0 rgba(0, 255, 204, 0); }
+      }
+
+      /* 信息卡片主容器 */
+      #info-card {
+        position: absolute; bottom: -400px; left: 5%; width: 90%;
+        background: rgba(20, 30, 40, 0.85); backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px); border: 1px solid rgba(0, 255, 204, 0.3);
+        border-radius: 16px; color: white; padding: 20px;
+        box-sizing: border-box; z-index: 9999;
+        transition: bottom 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+      }
+      #info-card.show { bottom: 20px; }
+
+      /* 卡片文字内容样式 */
+      .info-title { font-size: 22px; font-weight: bold; color: #00ffcc; margin-bottom: 8px; border-bottom: 1px solid #334455; padding-bottom: 8px;}
+      .info-tag { display: inline-block; background: #005544; color: #ccffee; padding: 4px 10px; border-radius: 20px; font-size: 12px; margin-right: 8px; margin-bottom: 10px;}
+      .info-desc { font-size: 14px; line-height: 1.6; color: #dddddd; margin-bottom: 15px;}
+
+      /* 统一按钮样式 */
+      .action-btn {
+        display: block; width: 100%; padding: 12px; margin-top: 10px;
+        border: none; border-radius: 8px; color: white;
+        font-weight: bold; font-size: 16px; cursor: pointer; text-align: center;
+        transition: all 0.3s;
+      }
+      .action-btn:active { transform: scale(0.95); }
+
+      .audio-btn { background: linear-gradient(90deg, #008866, #00bb88); }
+
+      /* 创新点二专属样式：斜光探查按钮 */
+      .flashlight-btn {
+        background: linear-gradient(135deg, #f39c12, #d35400);
+        box-shadow: 0 4px 15px rgba(211, 84, 0, 0.4);
+      }
+      .flashlight-btn.active-mode {
+        background: linear-gradient(135deg, #00ffcc, #00b894);
+        box-shadow: 0 4px 15px rgba(0, 255, 204, 0.4);
+        color: #111;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- 扫描引导层 -->
+    <div id="scanning-overlay">
+      <div class="scan-frame"></div>
+      <h3>请将摄像头对准岩画实体</h3>
+      <p style="font-size: 14px; color: #aaa;">AI 视觉引擎正在追踪多目标...</p>
+    </div>
+
+    <!-- 动态岩画信息卡片 -->
+    <div id="info-card">
+      <div class="info-title" id="card-title">加载中...</div>
+      <div>
+        <span class="info-tag" id="card-location">📍 发现地: 加载中</span>
+        <span class="info-tag" id="card-age">⏳ 年代: 加载中</span>
+      </div>
+      <div class="info-desc" id="card-desc">
+        描述信息加载中...
+      </div>
+      <!-- 语音按钮 -->
+      <button class="action-btn audio-btn" onclick="playAudio()">🔊 播放智能语音讲解</button>
+      <!-- 创新点二：斜光控制按钮 -->
+      <button class="action-btn flashlight-btn" id="flashlight-btn">🔦 开启斜光探查模式</button>
+    </div>
+
+    <!-- AR 场景核心引擎 (支持光影管理) -->
+    <a-scene mindar-image="imageTargetSrc: ./targets.mind; filterMinCF:0.0001; filterBeta: 0.001" color-space="sRGB" renderer="colorManagement: true, physicallyCorrectLights: true" vr-mode-ui="enabled: false" device-orientation-permission-ui="enabled: false">
+
+      <a-assets>
+        <!-- 加载 11 个 3D 浮雕模型 -->
+        <a-asset-item id="rockModel0" src="./rock_0_hollow.glb"></a-asset-item>
+        <a-asset-item id="rockModel1" src="./rock_1_hollow.glb"></a-asset-item>
+        <a-asset-item id="rockModel2" src="./rock_2_hollow.glb"></a-asset-item>
+        <a-asset-item id="rockModel3" src="./rock_3_hollow.glb"></a-asset-item>
+        <a-asset-item id="rockModel4" src="./rock_4_hollow.glb"></a-asset-item>
+        <a-asset-item id="rockModel5" src="./rock_5_hollow.glb"></a-asset-item>
+        <a-asset-item id="rockModel6" src="./rock_6_hollow.glb"></a-asset-item>
+        <a-asset-item id="rockModel7" src="./rock_7_hollow.glb"></a-asset-item>
+        <a-asset-item id="rockModel8" src="./rock_8_hollow.glb"></a-asset-item>
+        <a-asset-item id="rockModel9" src="./rock_9_hollow.glb"></a-asset-item>
+        <a-asset-item id="rockModel10" src="./rock_10_hollow.glb"></a-asset-item>
+      </a-assets>
+
+      <a-camera position="0 0.5 0.5" look-controls="enabled: false"></a-camera>
+
+      <!-- 【创新点二核心】：动态光影系统 -->
+      <!-- 基础环境光 (正常模式时为1.0) -->
+      <a-light id="ambient-light" type="ambient" color="#ffffff" intensity="1.0"></a-light>
+      <!-- 虚拟手电筒 (平行光，初始处于关闭状态，准备接收IMU数据) -->
+      <a-light id="oblique-light" type="directional" color="#ffeadb" intensity="0" position="0 0 1" castShadow="true"></a-light>
+
+      <!-- 图像追踪锚点 0-10 (添加了 shadow="receive: true" 以响应手电筒阴影) -->
+      <a-entity mindar-image-target="targetIndex: 0" class="ar-target" data-index="0">
+        <a-gltf-model rotation="0 20 0" position="0 0.5 0.5" scale="0.1 0.1 0.1" src="#rockModel0" shadow="receive: true"></a-gltf-model>
+      </a-entity>
+
+      <a-entity mindar-image-target="targetIndex: 1" class="ar-target" data-index="1">
+        <a-gltf-model rotation="0 20 0" position="0 0.5 0.5" scale="0.1 0.1 0.1" src="#rockModel1" shadow="receive: true"></a-gltf-model>
+      </a-entity>
+
+      <a-entity mindar-image-target="targetIndex: 2" class="ar-target" data-index="2">
+        <a-gltf-model rotation="0 20 0" position="0 0.5 0.5" scale="0.1 0.1 0.1" src="#rockModel2" shadow="receive: true"></a-gltf-model>
+      </a-entity>
+
+      <a-entity mindar-image-target="targetIndex: 3" class="ar-target" data-index="3">
+        <a-gltf-model rotation="0 20 0" position="0 0.5 0.5" scale="0.1 0.1 0.1" src="#rockModel3" shadow="receive: true"></a-gltf-model>
+      </a-entity>
+
+      <a-entity mindar-image-target="targetIndex: 4" class="ar-target" data-index="4">
+        <a-gltf-model rotation="0 20 0" position="0 0.5 0.5" scale="0.1 0.1 0.1" src="#rockModel4" shadow="receive: true"></a-gltf-model>
+      </a-entity>
+
+      <a-entity mindar-image-target="targetIndex: 5" class="ar-target" data-index="5">
+        <a-gltf-model rotation="0 20 0" position="0 0.5 0.5" scale="0.1 0.1 0.1" src="#rockModel5" shadow="receive: true"></a-gltf-model>
+      </a-entity>
+
+      <a-entity mindar-image-target="targetIndex: 6" class="ar-target" data-index="6">
+        <a-gltf-model rotation="0 20 0" position="0 0.5 0.5" scale="0.1 0.1 0.1" src="#rockModel6" shadow="receive: true"></a-gltf-model>
+      </a-entity>
+
+      <a-entity mindar-image-target="targetIndex: 7" class="ar-target" data-index="7">
+        <a-gltf-model rotation="0 20 0" position="0 0.5 0.5" scale="0.1 0.1 0.1" src="#rockModel7" shadow="receive: true"></a-gltf-model>
+      </a-entity>
+
+      <a-entity mindar-image-target="targetIndex: 8" class="ar-target" data-index="8">
+        <a-gltf-model rotation="0 20 0" position="0 0.5 0.5" scale="0.1 0.1 0.1" src="#rockModel8" shadow="receive: true"></a-gltf-model>
+      </a-entity>
+
+      <a-entity mindar-image-target="targetIndex: 9" class="ar-target" data-index="9">
+        <a-gltf-model rotation="0 20 0" position="0 0.5 0.5" scale="0.1 0.1 0.1" src="#rockModel9" shadow="receive: true"></a-gltf-model>
+      </a-entity>
+
+      <a-entity mindar-image-target="targetIndex: 10" class="ar-target" data-index="10">
+        <a-gltf-model rotation="0 20 0" position="0 0.5 0.5" scale="0.1 0.1 0.1" src="#rockModel10" shadow="receive: true"></a-gltf-model>
+      </a-entity>
+
+    </a-scene>
+
+    <!-- UI 与 光影交互逻辑 -->
+    <script>
+      // 岩画图鉴数据库 (支持 11 个目标)
+      const rockDatabase = {
+        0: {
+          title: "巫师作法",
+          location: "📍 发现地: 内蒙古乌拉特中旗呼鲁斯太苏木地里哈日",
+          age: "⏳ 年代: 石器时代",
+          desc: "凿刻，巫师作法，正面人像，双辫，双臂平伸，自时部折举向上，五指分开，胸部三⻆形，两腿叉开，系尾饰，狩猎，猎人，心态。"
+        },
+        1: {
+          title: "太阳神",
+          location: "📍 发现地: 内蒙古乌海市桌子山召烧沟",
+          age: "⏳ 年代: 新石器时代末至⻘铜时代",
+          desc: "太阳神，祭祀"
+        },
+        2: {
+          title: "猛虎",
+          location: "📍 发现地: 内蒙古乌海市背沟",
+          age: "⏳ 年代: ⻘铜时代至早期铁器时代",
+          desc: "画面爲一只猛⻁，龇牙咧嘴，作向前跃动的姿态，凶猛异常。约爲⻘铜时代至早期铁器时代游牧人的作品。"
+        },
+        3: {
+          title: "北山羊与符号",
+          location: "📍 发现地: 内蒙古阿拉善右旗孟根布拉格苏木曼德拉山",
+          age: "⏳ 年代: 北朝",
+          desc: "画面左方，一个制作粗糙的北山羊与一『D』形符号相连。共有七个『伊』形符号。关干它的含义，学者们作了不同的解释，或认爲是宇宙的象征，或认爲它是蒙古包式建筑物的符号，而英国学者卡纳在《人类的性崇拜》一书中则认爲，纵贯圆圈的十字，是完美的象征，可解释爲『男性的完满发展达到女性需要的标准』"
+        },
+        4: {
+          title: "骑马人、羊、三⻆形",
+          location: "📍 发现地: 内蒙古阿拉善右旗孟根布拉格苏木曼德拉山",
+          age: "⏳ 年代: 西夏",
+          desc: "画面左边是一个骑马人，往右有三个三⻆形。这些三⻆符号，或表示帐篷，或表示男女性器，一般正三⻆形表示男根，倒置三⻆形表示女阴。三⻆形之上有一简略动物形。右边两只羊。是用锥、刀等铁工具的锐锋划刻而成的，以纤细的单线条组成图像。此图是⻄夏党项人的作品。"
+        },
+        5: {
+          title: "骆驼与北山羊",
+          location: "📍 发现地: 甘肃商北蒙古族自治县马鬃山和尚井",
+          age: "⏳ 年代: 未知",
+          desc: "画面上方有一体形高大的双峰骆驼，左下方有一体形较小的骆驼正昂首吼叫，似属失群的仔驼。北山羊伫立对面，采用凿刻法制作。"
+        },
+        6: {
+          title: "群虎",
+          location: "📍 发现地: ⻘海海⻄沟",
+          age: "⏳ 年代: 未知",
+          desc: "“敲凿法制作。画面经现代人用石头磨划加工。"
+        },
+        7: {
+          title: "骆驼与野牛",
+          location: "📍 发现地: ⻘海海⻄装古族藏族自治州天峻县天棚乡",
+          age: "⏳ 年代: 未知",
+          desc: "第一期，敲凿法制作。画面的某些形象经现代人打磨加工过。"
+        },
+        8: {
+          title: "鹿羊图",
+          location: "📍 发现地: 新疆阿勒泰地区富蕴县徐永恰勒",
+          age: "⏳ 年代: 未知",
+          desc: "“岩画所在的石面颜色略近黑色，画面尺寸为60厘米×55厘米。画面主要凿刻并表现了一头成熟的母鹿，其枝状的角高高耸起。在母鹿的身下、腿后，有两只小鹿跟随。母鹿的左上方，是一只身躯很小的小羊。这处凿刻手法比较稚拙，除了大羊是用轮廓线勾勒之外，鹿与小羊均是通体凿刻，形状如同符号。其思想内涵似乎是在表现对牲畜繁衍的歌颂，以及对草原畜群兴旺景象的赞美。"
+        },
+        9: {
+          title: "牦牛",
+          location: "📍 发现地: ⻄藏尼玛县加林山",
+          age: "⏳ 年代: 未知",
+          desc: "两头体形肥硕的牦牛正抵角相对，在它们下方有一个人物。"
+        },
+        10: {
+          title: "人物",
+          location: "📍 发现地: ⻄藏当雄县扎⻄岛洞穴",
+          age: "⏳ 年代: 未知",
+          desc: "画面正中，站立着六个人，他们均身着及地长袍，腰部较为纤细，似为女性。在她们周围，还有一些动物。"
+        }
+      };
+
+      // 核心 UI 节点
+      const scanningOverlay = document.getElementById('scanning-overlay');
+      const infoCard = document.getElementById('info-card');
+      const uiTitle = document.getElementById('card-title');
+      const uiLocation = document.getElementById('card-location');
+      const uiAge = document.getElementById('card-age');
+      const uiDesc = document.getElementById('card-desc');
+
+      // 光影组件
+      const flashlightBtn = document.getElementById('flashlight-btn');
+      const ambientLight = document.getElementById('ambient-light');
+      const obliqueLight = document.getElementById('oblique-light');
+
+      let isNightMode = false;
+      let gyroActive = false;
+
+      // ====== 模块1: 图像追踪与卡片展示逻辑 ======
+      const targets = document.querySelectorAll('.ar-target');
+      targets.forEach((target) => {
+        target.addEventListener("targetFound", () => {
+          const currentIndex = target.getAttribute('data-index');
+          const data = rockDatabase[currentIndex];
+
+          if (data) {
+            uiTitle.innerText = data.title;
+            uiLocation.innerText = data.location;
+            uiAge.innerText = data.age;
+            uiDesc.innerText = data.desc;
+          }
+
+          scanningOverlay.style.opacity = '0';
+          setTimeout(() => {
+            infoCard.classList.add('show');
+          }, 300);
+        });
+
+        target.addEventListener("targetLost", () => {
+          scanningOverlay.style.opacity = '1';
+          infoCard.classList.remove('show');
+
+          // 如果丢失目标时正处于夜间模式，也可选择自动退出（根据需求）
+          // if(isNightMode) flashlightBtn.click();
+        });
+      });
+
+      // 语音播放占位
+      function playAudio() {
+        const currentTitle = uiTitle.innerText;
+        alert(`开始播放【${currentTitle}】的语音讲解录音...`);
+      }
+
+
+      // ====== 模块2: 双端兼容的 IMU 驱动斜光算法 (大论文创新点) ======
+
+      function requestOrientationPermission() {
+        // 苹果 iOS 13+ 逻辑
+        if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
+          DeviceOrientationEvent.requestPermission()
+                  .then(permissionState => {
+                    if (permissionState === 'granted') {
+                      window.addEventListener('deviceorientation', handleOrientation);
+                      gyroActive = true;
+                    } else {
+                      alert("由于苹果系统限制，需授予传感器权限才能体验斜光探查！");
+                    }
+                  })
+                  .catch(console.error);
+        } else {
+          // 安卓 Android 逻辑：直接绑定监听
+          if (window.DeviceOrientationEvent) {
+            window.addEventListener('deviceorientation', handleOrientation);
+            gyroActive = true;
+            // HTTPS 拦截警告
+            if (location.protocol !== 'https:' && location.hostname !== 'localhost') {
+              console.warn("注意：在非 HTTPS 环境下，安卓浏览器可能会静默拦截陀螺仪数据！");
+            }
+          } else {
+            alert("您的设备不支持陀螺仪功能！");
+          }
+        }
+      }
+
+      // 陀螺仪数据处理与光源映射函数
+      function handleOrientation(event) {
+        if (!isNightMode) return;
+
+        let gamma = event.gamma; // 左右倾斜
+        let beta = event.beta;   // 前后倾斜
+
+        // 若安卓在 HTTP 下被拦截，event.gamma 可能会是 null
+        if (gamma === null || beta === null) return;
+
+        // 约束角度，防止光源偏移过大
+        if (gamma > 90) gamma = 90;
+        if (gamma < -90) gamma = -90;
+        if (beta > 90) beta = 90;
+        if (beta < -90) beta = -90;
+
+        // 映射光源坐标
+        let lightX = gamma * 0.05;
+        let lightY = (beta - 45) * 0.05;
+        let lightZ = 1.5;
+
+        obliqueLight.setAttribute('position', `${lightX} ${lightY} ${lightZ}`);
+      }
+
+      // 按钮状态机切换
+      flashlightBtn.addEventListener('click', () => {
+        isNightMode = !isNightMode;
+
+        if (isNightMode) {
+          // 开启探查模式
+          if (!gyroActive) requestOrientationPermission();
+
+          flashlightBtn.innerText = "☀️ 退出斜光模式";
+          flashlightBtn.classList.add('active-mode');
+
+          // 压暗全局环境，开启斜照强光
+          ambientLight.setAttribute('intensity', '0.15');
+          ambientLight.setAttribute('color', '#1a1a2e'); // 暗夜蓝调
+          obliqueLight.setAttribute('intensity', '2.5'); // 高强度平行光
+        } else {
+          // 退出探查模式
+          flashlightBtn.innerText = "🔦 开启斜光探查模式";
+          flashlightBtn.classList.remove('active-mode');
+
+          // 恢复正常导览光照
+          ambientLight.setAttribute('intensity', '1.0');
+          ambientLight.setAttribute('color', '#ffffff');
+          obliqueLight.setAttribute('intensity', '0');
+        }
+      });
+    </script>
+  </body>
+</html>
