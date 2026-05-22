@@ -53,9 +53,9 @@
         transition: all 0.3s;
       }
       .action-btn:active { transform: scale(0.95); }
-
+      
       .audio-btn { background: linear-gradient(90deg, #008866, #00bb88); }
-
+      
       /* 创新点二专属样式：斜光探查按钮 */
       .flashlight-btn {
         background: linear-gradient(135deg, #f39c12, #d35400);
@@ -110,57 +110,57 @@
         <a-asset-item id="rockModel10" src="./rock_10_hollow.glb"></a-asset-item>
       </a-assets>
 
-      <a-camera position="0 0.5 0.5" look-controls="enabled: false"></a-camera>
+      <a-camera position="-0.3 0.8 0.5" look-controls="enabled: false"></a-camera>
 
-      <!-- 【创新点二核心】：动态光影系统 -->
-      <!-- 基础环境光 (正常模式时为1.0) -->
-      <a-light id="ambient-light" type="ambient" color="#ffffff" intensity="1.0"></a-light>
-      <!-- 虚拟手电筒 (平行光，初始处于关闭状态，准备接收IMU数据) -->
-      <a-light id="oblique-light" type="directional" color="#ffeadb" intensity="0" position="0 0 1" castShadow="true"></a-light>
+      <!-- 【修复点】：动态光影系统重新配置 -->
+      <!-- 基础环境光 (提亮底色) -->
+      <a-light id="ambient-light" type="ambient" color="#ffffff" intensity="1.5"></a-light>
+      <!-- 虚拟手电筒 (在正常模式下，作为一束固定的正面斜上方的自然光，防止PBR材质死黑) -->
+      <a-light id="oblique-light" type="directional" color="#ffffff" intensity="1.0" position="0 2 1" castShadow="true"></a-light>
 
       <!-- 图像追踪锚点 0-10 (添加了 shadow="receive: true" 以响应手电筒阴影) -->
       <a-entity mindar-image-target="targetIndex: 0" class="ar-target" data-index="0">
-        <a-gltf-model rotation="0 20 0" position="0 0.5 0.5" scale="0.1 0.1 0.1" src="#rockModel0" shadow="receive: true"></a-gltf-model>
+        <a-gltf-model rotation="0 10 0" position="-0.3 0.8 0.5" scale="0.1 0.1 0.1" src="#rockModel0" shadow="receive: true"></a-gltf-model>
       </a-entity>
 
       <a-entity mindar-image-target="targetIndex: 1" class="ar-target" data-index="1">
-        <a-gltf-model rotation="0 20 0" position="0 0.5 0.5" scale="0.1 0.1 0.1" src="#rockModel1" shadow="receive: true"></a-gltf-model>
+        <a-gltf-model rotation="0 10 0" position="-0.3 0.8 0.5" scale="0.1 0.1 0.1" src="#rockModel1" shadow="receive: true"></a-gltf-model>
       </a-entity>
 
       <a-entity mindar-image-target="targetIndex: 2" class="ar-target" data-index="2">
-        <a-gltf-model rotation="0 20 0" position="0 0.5 0.5" scale="0.1 0.1 0.1" src="#rockModel2" shadow="receive: true"></a-gltf-model>
+        <a-gltf-model rotation="0 10 0" position="-0.3 0.8 0.5" scale="0.1 0.1 0.1" src="#rockModel2" shadow="receive: true"></a-gltf-model>
       </a-entity>
 
       <a-entity mindar-image-target="targetIndex: 3" class="ar-target" data-index="3">
-        <a-gltf-model rotation="0 20 0" position="0 0.5 0.5" scale="0.1 0.1 0.1" src="#rockModel3" shadow="receive: true"></a-gltf-model>
+        <a-gltf-model rotation="0 10 0" position="-0.3 0.8 0.5" scale="0.1 0.1 0.1" src="#rockModel3" shadow="receive: true"></a-gltf-model>
       </a-entity>
 
       <a-entity mindar-image-target="targetIndex: 4" class="ar-target" data-index="4">
-        <a-gltf-model rotation="0 20 0" position="0 0.5 0.5" scale="0.1 0.1 0.1" src="#rockModel4" shadow="receive: true"></a-gltf-model>
+        <a-gltf-model rotation="0 10 0" position="-0.3 0.8 0.5" scale="0.1 0.1 0.1" src="#rockModel4" shadow="receive: true"></a-gltf-model>
       </a-entity>
 
       <a-entity mindar-image-target="targetIndex: 5" class="ar-target" data-index="5">
-        <a-gltf-model rotation="0 20 0" position="0 0.5 0.5" scale="0.1 0.1 0.1" src="#rockModel5" shadow="receive: true"></a-gltf-model>
+        <a-gltf-model rotation="0 10 0" position="-0.3 0.8 0.5" scale="0.1 0.1 0.1" src="#rockModel5" shadow="receive: true"></a-gltf-model>
       </a-entity>
 
       <a-entity mindar-image-target="targetIndex: 6" class="ar-target" data-index="6">
-        <a-gltf-model rotation="0 20 0" position="0 0.5 0.5" scale="0.1 0.1 0.1" src="#rockModel6" shadow="receive: true"></a-gltf-model>
+        <a-gltf-model rotation="0 10 0" position="-0.3 0.8 0.5" scale="0.1 0.1 0.1" src="#rockModel6" shadow="receive: true"></a-gltf-model>
       </a-entity>
 
       <a-entity mindar-image-target="targetIndex: 7" class="ar-target" data-index="7">
-        <a-gltf-model rotation="0 20 0" position="0 0.5 0.5" scale="0.1 0.1 0.1" src="#rockModel7" shadow="receive: true"></a-gltf-model>
+        <a-gltf-model rotation="0 10 0" position="-0.3 0.8 0.5" scale="0.1 0.1 0.1" src="#rockModel7" shadow="receive: true"></a-gltf-model>
       </a-entity>
 
       <a-entity mindar-image-target="targetIndex: 8" class="ar-target" data-index="8">
-        <a-gltf-model rotation="0 20 0" position="0 0.5 0.5" scale="0.1 0.1 0.1" src="#rockModel8" shadow="receive: true"></a-gltf-model>
+        <a-gltf-model rotation="0 10 0" position="-0.3 0.8 0.5" scale="0.1 0.1 0.1" src="#rockModel8" shadow="receive: true"></a-gltf-model>
       </a-entity>
 
       <a-entity mindar-image-target="targetIndex: 9" class="ar-target" data-index="9">
-        <a-gltf-model rotation="0 20 0" position="0 0.5 0.5" scale="0.1 0.1 0.1" src="#rockModel9" shadow="receive: true"></a-gltf-model>
+        <a-gltf-model rotation="0 10 0" position="-0.3 0.8 0.5" scale="0.1 0.1 0.1" src="#rockModel9" shadow="receive: true"></a-gltf-model>
       </a-entity>
 
       <a-entity mindar-image-target="targetIndex: 10" class="ar-target" data-index="10">
-        <a-gltf-model rotation="0 20 0" position="0 0.5 0.5" scale="0.1 0.1 0.1" src="#rockModel10" shadow="receive: true"></a-gltf-model>
+        <a-gltf-model rotation="0 10 0" position="-0.3 0.8 0.5" scale="0.1 0.1 0.1" src="#rockModel10" shadow="receive: true"></a-gltf-model>
       </a-entity>
 
     </a-scene>
@@ -244,7 +244,7 @@
       const uiLocation = document.getElementById('card-location');
       const uiAge = document.getElementById('card-age');
       const uiDesc = document.getElementById('card-desc');
-
+      
       // 光影组件
       const flashlightBtn = document.getElementById('flashlight-btn');
       const ambientLight = document.getElementById('ambient-light');
@@ -268,50 +268,40 @@
           }
 
           scanningOverlay.style.opacity = '0';
-          setTimeout(() => {
-            infoCard.classList.add('show');
-          }, 300);
+          setTimeout(() => { infoCard.classList.add('show'); }, 300);
         });
 
         target.addEventListener("targetLost", () => {
           scanningOverlay.style.opacity = '1';
           infoCard.classList.remove('show');
-
-          // 如果丢失目标时正处于夜间模式，也可选择自动退出（根据需求）
-          // if(isNightMode) flashlightBtn.click();
         });
       });
 
-      // 语音播放占位
       function playAudio() {
         const currentTitle = uiTitle.innerText;
         alert(`开始播放【${currentTitle}】的语音讲解录音...`);
       }
 
-
-      // ====== 模块2: 双端兼容的 IMU 驱动斜光算法 (大论文创新点) ======
-
+      // ====== 模块2: 双端兼容的 IMU 驱动斜光算法 ======
+      
       function requestOrientationPermission() {
-        // 苹果 iOS 13+ 逻辑
         if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
           DeviceOrientationEvent.requestPermission()
-                  .then(permissionState => {
-                    if (permissionState === 'granted') {
-                      window.addEventListener('deviceorientation', handleOrientation);
-                      gyroActive = true;
-                    } else {
-                      alert("由于苹果系统限制，需授予传感器权限才能体验斜光探查！");
-                    }
-                  })
-                  .catch(console.error);
+            .then(permissionState => {
+              if (permissionState === 'granted') {
+                window.addEventListener('deviceorientation', handleOrientation);
+                gyroActive = true;
+              } else {
+                alert("由于苹果系统限制，需授予传感器权限才能体验斜光探查！");
+              }
+            })
+            .catch(console.error);
         } else {
-          // 安卓 Android 逻辑：直接绑定监听
           if (window.DeviceOrientationEvent) {
             window.addEventListener('deviceorientation', handleOrientation);
             gyroActive = true;
-            // HTTPS 拦截警告
             if (location.protocol !== 'https:' && location.hostname !== 'localhost') {
-              console.warn("注意：在非 HTTPS 环境下，安卓浏览器可能会静默拦截陀螺仪数据！");
+               console.warn("注意：在非 HTTPS 环境下，安卓浏览器可能会静默拦截陀螺仪数据！");
             }
           } else {
             alert("您的设备不支持陀螺仪功能！");
@@ -319,54 +309,51 @@
         }
       }
 
-      // 陀螺仪数据处理与光源映射函数
       function handleOrientation(event) {
-        if (!isNightMode) return;
+        if (!isNightMode) return; 
 
-        let gamma = event.gamma; // 左右倾斜
-        let beta = event.beta;   // 前后倾斜
+        let gamma = event.gamma; 
+        let beta = event.beta;   
 
-        // 若安卓在 HTTP 下被拦截，event.gamma 可能会是 null
         if (gamma === null || beta === null) return;
 
-        // 约束角度，防止光源偏移过大
-        if (gamma > 90) gamma = 90;
-        if (gamma < -90) gamma = -90;
-        if (beta > 90) beta = 90;
-        if (beta < -90) beta = -90;
+        if (gamma > 90) gamma = 90; if (gamma < -90) gamma = -90;
+        if (beta > 90) beta = 90;   if (beta < -90) beta = -90;
 
-        // 映射光源坐标
-        let lightX = gamma * 0.05;
-        let lightY = (beta - 45) * 0.05;
-        let lightZ = 1.5;
+        let lightX = gamma * 0.05; 
+        let lightY = (beta - 45) * 0.05; 
+        let lightZ = 1.5; 
 
         obliqueLight.setAttribute('position', `${lightX} ${lightY} ${lightZ}`);
       }
 
-      // 按钮状态机切换
+      // 【修复点】：按钮状态机切换时，正确恢复默认主光
       flashlightBtn.addEventListener('click', () => {
         isNightMode = !isNightMode;
-
+        
         if (isNightMode) {
-          // 开启探查模式
-          if (!gyroActive) requestOrientationPermission();
-
+          // --- 开启探查模式 (夜晚) ---
+          if (!gyroActive) requestOrientationPermission(); 
+          
           flashlightBtn.innerText = "☀️ 退出斜光模式";
           flashlightBtn.classList.add('active-mode');
-
-          // 压暗全局环境，开启斜照强光
-          ambientLight.setAttribute('intensity', '0.15');
+          
+          // 压暗全局环境，开启跟随手机的高强度定向光
+          ambientLight.setAttribute('intensity', '0.15'); 
           ambientLight.setAttribute('color', '#1a1a2e'); // 暗夜蓝调
-          obliqueLight.setAttribute('intensity', '2.5'); // 高强度平行光
+          obliqueLight.setAttribute('intensity', '2.5'); // 强光手电筒
+          obliqueLight.setAttribute('color', '#ffeadb'); // 暖色手电
         } else {
-          // 退出探查模式
+          // --- 退出探查模式 (白天/正常) ---
           flashlightBtn.innerText = "🔦 开启斜光探查模式";
           flashlightBtn.classList.remove('active-mode');
-
-          // 恢复正常导览光照
-          ambientLight.setAttribute('intensity', '1.0');
+          
+          // 恢复明亮环境光，并将定向光固定为模拟正面的自然光（防止死黑）
+          ambientLight.setAttribute('intensity', '1.5');
           ambientLight.setAttribute('color', '#ffffff');
-          obliqueLight.setAttribute('intensity', '0');
+          obliqueLight.setAttribute('intensity', '1.0'); 
+          obliqueLight.setAttribute('position', '0 2 1'); // 固定在斜上方
+          obliqueLight.setAttribute('color', '#ffffff'); // 恢复正白光
         }
       });
     </script>
